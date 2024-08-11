@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# API credentials
+API_KEY=""                  #cloudflare key
+EMAIL=""                    #cloudflare email
+DOMAIN=""                   #cloudflare 你的顶级域名  xx.com
+RECORD_NAME=""              #n你的子域名  demo 
+# Zone ID
+ZONE_ID=""
+
+# 从result.csv第二行提取ip.....      例: NR>=2 && NR<=5  从第五行提取到第二行ip , 绑定4个ip
+
+IP_ADDRESSES=($(awk -F',' 'NR>=2 && NR<=2 {print $1}' result.csv))
+
+    
+
+# Function to delete an A record by ID
+delete_record() {
+  local record_id=$1
+  curl -s -X DELETE "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${record_id}" \
+    -H "X-Auth-Email: ${EMAIL}" \
+    -H "X-Auth-Key: ${API_KEY}" \
+    -H "Content-Type: application/json"
+}
+
+# Function to create an A record
+create_record() {
+  local ip_address=$1
+  curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records" \
+    -H "X-Auth-Email: ${EMAIL}" \
+    -H "X-Auth-Key: ${API_KEY}" \
+    -H "Content-Type: application/json" \
+    --data "{\"type\":\"A\",\"name\":\"${RECORD_NAME}.${DOMAIN}\",\"content\":\"${ip_address}\",\"ttl\":1,\"proxied\":false}"
+}
+
+# Retrieve all A records for the subdomain
+existing_records=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?type=A&name=${RECORD_NAME}.${DOMAIN}" \
+  -H "X-Auth-Email: ${EMAIL}" \
+  -H "X-Auth-Key: ${API_KEY}" \
+  -H "Content-Type: application/json" | jq -r '.result[] | {id: .id, ip: .content}')
+
+# Delete existing records
+for record in $(echo "$existing_records" | jq -c '.'); do
+  record_id=$(echo "$record" | jq -r '.id')
+  delete_record $record_id
+done
+
+# Add new records
+for ip_address in "${IP_ADDRESSES[@]}"; do
+  create_record $ip_address
+done
+
+echo "A records updated successfully."
