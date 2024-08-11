@@ -1,4 +1,5 @@
 # 本地虚拟机ubuntu定时优选cloudflare id绑定到域名
+###### 当然其他平台也是可以的
 ###### 根据XIU2大佬优选的脚本加入绑定到cloudflare域名 ubuntu设置定时执行
 ###### 先更新ubuntu脚本所需要的依赖 全程root权限
 ###### apt-get update
