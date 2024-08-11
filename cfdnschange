@@ -1,18 +1,18 @@
 #!/bin/bash
 
 # API credentials
-API_KEY=""                  #cloudflare key
-EMAIL=""                    #cloudflare email
-DOMAIN=""                   #cloudflare 你的顶级域名  xx.com
-RECORD_NAME=""              #n你的子域名  demo 
+API_KEY="xx" #cloudflare>网站>域名>获取你的api>创建>编辑dns>区域 dns 编辑>包括 特定区域>你的域名
+EMAIL="xx@gmail.com" #cloudflare注册的域名
+DOMAIN="xxx.xx" #顶级域名
+RECORD_NAME="demo"  #子域名
 # Zone ID
-ZONE_ID=""
+ZONE_ID="xx" #空间id  网站>域名>区域id
 
-# 从result.csv第二行提取ip.....      例: NR>=2 && NR<=5  从第五行提取到第二行ip , 绑定4个ip
 
+# Extract IP addresses from the CSV file (e.g., from lines 2 to 5) 提取第二行ip 多个ip绑定同一域名,NR>=2 && NR<=5.从第二行提取到到5行ip
 IP_ADDRESSES=($(awk -F',' 'NR>=2 && NR<=2 {print $1}' result.csv))
 
-    
+
 
 # Function to delete an A record by ID
 delete_record() {
@@ -50,4 +50,4 @@ for ip_address in "${IP_ADDRESSES[@]}"; do
   create_record $ip_address
 done
 
-echo "A records updated successfully."
+echo "YES! u are beautiful."
